@@ -1,0 +1,105 @@
+; file: readfalc.pro = IDL main to read & plot falc.dat = FALC model
+; last: Aug  2 2010 
+; note: file FALC.DAT from email Han Uitenbroek Apr 29 1999 
+;       = resampled Table 2 of Fontenla et al ApJ 406 319 1993
+;       = 2 LaTeX tables in falc.tex
+
+
+k = 1.38E-16
+
+
+close,1
+openr,1,'falc.dat'
+nh=80                ; nr FALC height values
+falc=fltarr(11,nh)   ; 11 FALC columns
+readf,1,falc
+  h=falc[0,*]
+  tau5=falc[1,*]
+  colm=falc[2,*]
+  temp=falc[3,*]
+  vturb=falc[4,*]
+  nhyd=falc[5,*]
+  nprot=falc[6,*]
+  nel=falc[7,*]
+  ptot=falc[8,*]
+  pgasptot=falc[9,*]
+  dens=falc[10,*]
+
+hyden=fltarr(nh)
+hyden=nhyd*1.67352E-24
+
+helden=fltarr(nh)
+helden=0.1*3.97*hyden
+
+pgas=fltarr(nh)
+pgas=pgasptot*ptot
+
+nhe=fltarr(nh)
+nhe=0.1*nhyd
+
+hydhe=fltarr(nh)
+;hydhe=(nel+nhyd)*k*temp
+hydhe=(nel+nhyd+nhe)*k*temp
+
+;------------------------------------------------------------------------------
+
+; plot falc model
+
+;-----Temperature vs height plot-----------
+;plot,h,temp,yrange=[3000,10000],$
+;  xtitle='height [km]',ytitle='temperature [K]'
+
+;STOP
+
+;-----Total Pressure vs column mass -------
+;plot,colm,ptot,xtitle='column mass [g cm-2]',ytitle='total pressure [dyn cm-2]'
+
+;stop
+
+;-----Densities vs height------------------
+;plot,h,dens,xrange=[-100,2500],title='Mass Density',$
+;  /ylog,xtitle='height [km]',ytitle='mass density [cm-3]'
+;oplot,h,hyden,linestyle=2,thick=2
+;oplot,h,helden,linestyle=3,thick=2
+
+;stop
+
+;-----Column Mass vs Height---------------
+;plot,h,colm,xrange=[-100,2500],title='Column Mass vs Height',$
+;  /ylog, xtitle='height [km]',ytitle='column mass [g cm-2]'
+
+;-----Gas Density vs height--------------
+;plot,h,dens,title='Gas Density',$
+;   /ylog,xtitle='height [km]',ytitle='gas density [g cm-3]'
+
+;-----Gas Pressure vs Height------------
+;plot,h,pgas,xrange=[-100,2500],title='Gas Pressure vs Height',$
+;  /ylog,xtitle='height [km]',ytitle='Gas Pressure [dyn cm-2]'
+
+;stop
+
+;oplot,h,hydhe,linestyle=2,thick=2
+
+rati=fltarr(nh)
+rati=pgas/hydhe
+
+;-----Gas Pressure Ratios-------------
+plot,h,rati,yrange=[0.9,1.2],title='Gas Pressure Ratios',$
+  xtitle='height [km]',ytitle='Pgas / (nh+ne+nhe)kT'
+
+;repeat plot on postscript file -- adjusted for each plot to be saved
+set_plot,'ps'      ; repeat plot on PostScript file
+device,filename='gaspressureratio.ps'
+plot,h,rati,yrange=[0.9,1.2],title='Gas Pressure Ratios',$
+  xtitle='height [km]',ytitle='Pgas / (nh+ne+nhe)kT'
+device,/close
+set_plot,'x'       ; return to screen; set_plot,'win' for Windows
+end
+
+
+
+
+
+
+
+
